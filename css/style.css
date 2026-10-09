@@ -1,0 +1,1668 @@
+/* ==========================================================================
+   Kopi Senja
+   Tokens, base, layout, components. Mobile-first.
+   Radius system: interactive elements are pills, media and blocks are sharp.
+   ========================================================================== */
+
+:root {
+  color-scheme: light dark;
+
+  --bg: #f1f2ee;
+  --bg-2: #e7e9e2;
+  --ink: #101a15;
+  --ink-2: #46534b;
+  --ember: #bd3816;
+  --ember-deep: #a13011;
+  --ember-text: #bd3816;
+  --on-ember: #ffffff;
+  --line: rgba(16, 26, 21, 0.16);
+  --line-strong: rgba(16, 26, 21, 0.56);
+  /* Inverted block palette: a deep-green field used for the opening-hours
+     section so the page has real block rhythm instead of uniform whitespace. */
+  --block: #101a15;
+  --block-ink: #eef0ea;
+  --block-ink-2: #b7c0b8;
+  --block-line: rgba(238, 240, 234, 0.22);
+  --block-ember: #f0754e;
+  --header-bg: rgba(241, 242, 238, 0.88);
+  --shadow-media: 0 2px 4px rgba(16, 26, 21, 0.05), 0 26px 50px -34px rgba(16, 26, 21, 0.55);
+  --shadow-fab: 0 2px 6px rgba(16, 26, 21, 0.18), 0 18px 34px -20px rgba(16, 26, 21, 0.6);
+
+  --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Karla", "Helvetica Neue", Arial, sans-serif;
+
+  --wrap: 77.5rem;
+  --gutter: clamp(1.15rem, 4vw, 2.5rem);
+  --section-space: clamp(3.25rem, 8vw, 6.5rem);
+  --header-h: 4.25rem;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); /* snappy: hovers and presses */
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1); /* graceful: entrances and reveals */
+  --ease-std: cubic-bezier(0.4, 0, 0.2, 1); /* even: state crossfades */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1512;
+    --bg-2: #131e19;
+    --ink: #ecefe8;
+    --ink-2: #9fada4;
+    --ember-text: #f0754e;
+    --line: rgba(236, 239, 232, 0.17);
+    --line-strong: rgba(236, 239, 232, 0.4);
+    --block: #060c0a;
+    --block-ink: #ecefe8;
+    --block-ink-2: #a9b6ad;
+    --block-line: rgba(236, 239, 232, 0.2);
+    --block-ember: #f0754e;
+    --header-bg: rgba(13, 21, 18, 0.88);
+    --shadow-media: 0 2px 4px rgba(0, 0, 0, 0.4), 0 26px 50px -34px rgba(0, 0, 0, 0.9);
+    --shadow-fab: 0 2px 6px rgba(0, 0, 0, 0.5), 0 18px 34px -20px rgba(0, 0, 0, 0.95);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Base
+   -------------------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--header-h) + 1rem);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* While a figure is still full width (before its grid layout kicks in),
+   stop tall portrait crops from growing past the viewport. */
+.hero-media img,
+.menu-media img,
+.about-media-tall img {
+  max-height: min(80vh, 40rem);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+body.menu-open {
+  overflow: hidden;
+}
+
+figure {
+  margin: 0;
+}
+
+/* Frames that clip scaled imagery during reveals. */
+.menu-media,
+.band,
+.about-media-tall,
+.about-media-square,
+.hours-media {
+  overflow: hidden;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.06;
+  letter-spacing: -0.015em;
+  margin: 0;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--ember-text);
+}
+
+:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+::selection {
+  background: var(--ember);
+  color: var(--on-ember);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  top: 0;
+  left: var(--gutter);
+  z-index: 60;
+  padding: 0.75rem 1.2rem;
+  background: var(--ink);
+  color: var(--bg);
+  font-family: var(--font-display);
+  font-weight: 650;
+  text-decoration: none;
+  transform: translateY(-120%);
+  transition: transform 0.2s var(--ease-out);
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+  outline-offset: -3px;
+  outline-color: var(--bg);
+}
+
+.sentinel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+}
+
+/* Fixed film grain: one shared texture layer over the whole page.
+   Static, pointer-transparent, never an animation or hover effect. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Scroll progress hairline; fills only where scroll-driven
+   animations are supported, otherwise it stays invisible. */
+.progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  height: 2px;
+  background: var(--ember);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  pointer-events: none;
+}
+
+.wrap {
+  width: 100%;
+  max-width: var(--wrap);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.section {
+  padding-block: var(--section-space);
+}
+
+/* Section index: a numeral riding a hairline opens each section like
+   a spread in a printed menu. Decorative, hidden from assistive tech. */
+.sec-index {
+  display: block;
+  padding-top: clamp(0.85rem, 2vw, 1.25rem);
+  margin-bottom: clamp(0.9rem, 2vw, 1.5rem);
+  border-top: 1px solid var(--line);
+  font-family: var(--font-display);
+  font-size: clamp(2.1rem, 4.6vw, 3.1rem);
+  font-weight: 400;
+  font-stretch: 118%;
+  line-height: 1;
+  color: var(--ember);
+}
+
+.hours .sec-index {
+  border-top-color: var(--block-line);
+  color: var(--block-ember);
+}
+
+/* --------------------------------------------------------------------------
+   Typography helpers
+   -------------------------------------------------------------------------- */
+
+.eyebrow {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 650;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ember-text);
+}
+
+.hero .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.hero .eyebrow::before {
+  content: "";
+  width: 2.25rem;
+  height: 2px;
+  background: var(--ember);
+}
+
+/* Display weight contrast: long headlines break into a heavy phrase and a
+   light continuation, within the same family. */
+.d-heavy {
+  font-weight: 800;
+}
+
+.d-light {
+  font-weight: 400;
+}
+
+.lede {
+  font-size: clamp(1.05rem, 1rem + 0.4vw, 1.2rem);
+  line-height: 1.6;
+  color: var(--ink-2);
+  max-width: 34rem;
+}
+
+.section-note {
+  margin-top: 0.7rem;
+  color: var(--ink-2);
+  font-size: 1rem;
+  max-width: 32rem;
+}
+
+/* --------------------------------------------------------------------------
+   Buttons and shared controls
+   -------------------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  min-height: 3rem;
+  padding: 0.75rem 1.45rem;
+  border: 1.5px solid transparent;
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.3s var(--ease-std), color 0.3s var(--ease-std),
+    border-color 0.3s var(--ease-std), transform 0.22s var(--ease-out);
+}
+
+.btn:active {
+  transform: translateY(1px) scale(0.985);
+}
+
+.btn-solid {
+  background: var(--ember);
+  border-color: var(--ember);
+  color: var(--on-ember);
+}
+
+.btn-solid:hover {
+  background: var(--ember-deep);
+  border-color: var(--ember-deep);
+}
+
+.btn-ghost {
+  border-color: var(--ink);
+  color: var(--ink);
+  background: transparent;
+}
+
+.btn-ghost:hover {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.btn-lg {
+  min-height: 3.35rem;
+  padding-inline: 1.9rem;
+  font-size: 1rem;
+}
+
+/* Pointer-only lift so touch devices never see the jump. */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .btn:hover {
+    transform: translateY(-2px);
+  }
+
+  .btn-solid:hover {
+    box-shadow: 0 14px 26px -16px rgba(189, 56, 22, 0.9);
+  }
+}
+
+.icon {
+  flex: none;
+}
+
+/* --------------------------------------------------------------------------
+   Header
+   -------------------------------------------------------------------------- */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  /* At the top of the page the bar merges with the dark hero below it,
+     then turns to frosted paper once the page scrolls. */
+  background: var(--block);
+  color: var(--block-ink);
+  border-bottom: 1px solid var(--block-line);
+  transition: background-color 0.4s var(--ease-std), border-color 0.4s var(--ease-std),
+    color 0.4s var(--ease-std);
+}
+
+.site-header.is-stuck {
+  background: var(--header-bg);
+  border-bottom-color: var(--line);
+  color: var(--ink);
+}
+
+/* backdrop-filter would turn the header into the containing block for the
+   fixed mobile nav, so drop it while the menu is open. */
+@supports (backdrop-filter: blur(8px)) {
+  .site-header.is-stuck:not(.is-open) {
+    backdrop-filter: blur(10px);
+  }
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: var(--header-h);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.brand-mark {
+  color: var(--ember);
+  flex: none;
+}
+
+/* Over the dark hero and in the footer the mark warms up so it
+   still reads against the deep green. */
+.site-header:not(.is-stuck) .brand-mark,
+.site-footer .brand-mark {
+  color: var(--block-ember);
+}
+
+.brand-name {
+  font-family: var(--font-display);
+  font-weight: 750;
+  font-size: 1.16rem;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+  font-stretch: 112%;
+}
+
+.nav-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  margin-right: -0.5rem;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 999px;
+  color: inherit;
+  cursor: pointer;
+}
+
+.nav-toggle-bars {
+  display: block;
+  width: 1.45rem;
+  height: 2px;
+  position: relative;
+  background: currentColor;
+  transition: background-color 0.3s var(--ease-std);
+}
+
+.nav-toggle-bars::before,
+.nav-toggle-bars span {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: currentColor;
+  transition: transform 0.4s var(--ease-soft);
+}
+
+.nav-toggle-bars::before {
+  top: -6px;
+}
+
+.nav-toggle-bars span {
+  top: 6px;
+}
+
+.site-header.is-open .nav-toggle-bars {
+  background: transparent;
+}
+
+.site-header.is-open .nav-toggle-bars::before {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.site-header.is-open .nav-toggle-bars span {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+/* Mobile nav panel */
+.nav {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2.5rem;
+  padding: calc(var(--header-h) + 2rem) var(--gutter) 3rem;
+  background: var(--bg);
+  overflow-y: auto;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(-0.75rem);
+  transition: opacity 0.4s var(--ease-soft), transform 0.4s var(--ease-soft), visibility 0.4s;
+}
+
+.site-header.is-open .nav {
+  visibility: visible;
+  opacity: 1;
+  transform: none;
+}
+
+.no-js .nav {
+  position: static;
+  visibility: visible;
+  opacity: 1;
+  transform: none;
+  padding: 0;
+  background: none;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.no-js .nav-toggle {
+  display: none;
+}
+
+.no-js .header-inner {
+  flex-wrap: wrap;
+  padding-bottom: 0.85rem;
+}
+
+/* Without JS the header never earns .is-stuck, so give it a solid
+   bar from the start instead of a transparent one. */
+.no-js .site-header {
+  background: var(--header-bg);
+  border-bottom-color: var(--line);
+  color: var(--ink);
+}
+
+.nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.no-js .nav-list {
+  flex-direction: row;
+  gap: 1.25rem;
+}
+
+.nav-list a {
+  display: inline-block;
+  padding: 0.55rem 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 6vw, 2.4rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  text-decoration: none;
+  transition: color 0.3s var(--ease-std);
+}
+
+.no-js .nav-list a {
+  font-size: 1rem;
+}
+
+.nav-list a:hover {
+  color: var(--ember-text);
+}
+
+.nav-list a[aria-current="true"] {
+  color: var(--ember-text);
+  text-decoration: underline;
+  text-decoration-thickness: 0.09em;
+  text-underline-offset: 0.16em;
+}
+
+.nav-cta {
+  align-self: flex-start;
+}
+
+/* Desktop header: the overlay nav becomes an inline row and the toggle
+   disappears. Matches the 64rem threshold used in main.js. */
+@media (min-width: 64rem) {
+  .nav {
+    position: static;
+    inset: auto;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: clamp(1.25rem, 2vw, 2rem);
+    padding: 0;
+    background: none;
+    overflow: visible;
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .nav-list {
+    flex-direction: row;
+    align-items: center;
+    gap: clamp(1.1rem, 1.8vw, 1.75rem);
+  }
+
+  .nav-list a {
+    padding: 0.5rem 0;
+    font-size: 1rem;
+    font-weight: 650;
+    letter-spacing: 0.01em;
+    color: inherit;
+  }
+
+  .nav-list a:hover,
+  .nav-list a[aria-current="true"] {
+    color: var(--block-ember);
+  }
+
+  .site-header.is-stuck .nav-list a:hover,
+  .site-header.is-stuck .nav-list a[aria-current="true"] {
+    color: var(--ember-text);
+  }
+
+  .nav-cta {
+    align-self: center;
+  }
+
+  .nav-toggle {
+    display: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Hero
+   -------------------------------------------------------------------------- */
+
+.hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--block);
+  color: var(--block-ink);
+  padding-top: clamp(2rem, 5vw, 4rem);
+  padding-bottom: clamp(3rem, 7vw, 5.5rem);
+}
+
+/* Dusk glow: warm light pooling at the top right behind the photo,
+   with a low ember horizon at the bottom left. */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(85% 75% at 78% 6%, rgba(189, 56, 22, 0.32), transparent 58%),
+    radial-gradient(65% 55% at 6% 102%, rgba(240, 117, 78, 0.14), transparent 70%);
+}
+
+/* Everything inside the hero re-tints to the block palette. */
+.hero .eyebrow {
+  color: var(--block-ember);
+}
+
+.hero .eyebrow::before {
+  background: var(--block-ember);
+}
+
+.hero .lede {
+  color: var(--block-ink-2);
+}
+
+.hero .d-light {
+  color: var(--block-ink-2);
+}
+
+.hero .btn-ghost {
+  border-color: var(--block-ink-2);
+  color: var(--block-ink);
+}
+
+.hero .btn-ghost:hover {
+  background: var(--block-ink);
+  border-color: var(--block-ink);
+  color: var(--block);
+}
+
+.hero-grid {
+  display: grid;
+  gap: clamp(2rem, 6vw, 3.5rem);
+}
+
+.hero-copy h1 {
+  margin-top: 1.1rem;
+  font-size: clamp(2.9rem, 1.4rem + 6vw, 6rem);
+  line-height: 1.0;
+  font-weight: 800;
+  font-stretch: 116%;
+  letter-spacing: -0.03em;
+  max-width: 15ch;
+}
+
+.hero-copy .lede {
+  margin-top: 1.35rem;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin-top: 2rem;
+}
+
+.hero-media {
+  /* edge-to-edge on phones, so the hero opens like a poster */
+  margin-inline: calc(var(--gutter) * -1);
+}
+
+.hero-media img {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  box-shadow: var(--shadow-media), 0 0 0 1px var(--block-line);
+}
+
+@media (min-width: 60rem) {
+  .hero-grid {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    align-items: center;
+    gap: clamp(2.5rem, 5vw, 4.5rem);
+  }
+
+  .hero-media {
+    margin-top: 1.5rem;
+    /* bleed past the gutter so the hero reads as a poster, not a card row */
+    margin-inline: 0 calc(var(--gutter) * -1);
+  }
+
+  .hero-media img {
+    max-height: min(74vh, 41rem);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Ticker strip
+   -------------------------------------------------------------------------- */
+
+/* One ember band between the hero and the menu: the page's only
+   continuous loop, carrying facts that repeat elsewhere on the page. */
+.marquee {
+  background: var(--ember);
+  color: var(--on-ember);
+  overflow: hidden;
+  padding-block: 0.85rem;
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+}
+
+.marquee-group {
+  display: flex;
+  align-items: center;
+  gap: 2.2rem;
+  padding-right: 2.2rem;
+  font-family: var(--font-display);
+  font-size: 0.86rem;
+  font-weight: 650;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.marquee-mark {
+  flex: none;
+  opacity: 0.75;
+}
+
+/* --------------------------------------------------------------------------
+   Menu
+   -------------------------------------------------------------------------- */
+
+.section-head h2,
+.hours-body h2,
+.location-copy h2 {
+  font-size: clamp(2.1rem, 1.4rem + 2.9vw, 3.4rem);
+  font-weight: 750;
+  font-stretch: 112%;
+}
+
+/* The menu sits on a tinted full-width field: block rhythm instead of
+   six identical white sections. */
+.menu {
+  background: var(--bg-2);
+}
+
+.menu-layout {
+  display: grid;
+  gap: clamp(2rem, 5vw, 3.5rem);
+  margin-top: clamp(1.75rem, 4vw, 2.75rem);
+}
+
+.tabs {
+  display: flex;
+  gap: 0.55rem;
+  padding-bottom: 0.35rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.tab {
+  flex: none;
+  min-height: 2.75rem;
+  padding: 0.5rem 1.2rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-2);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background-color 0.3s var(--ease-std), color 0.3s var(--ease-std),
+    border-color 0.3s var(--ease-std);
+}
+
+.tab:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.tab[aria-selected="true"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--bg);
+}
+
+.panels {
+  margin-top: 1.9rem;
+}
+
+.panel:focus-visible {
+  outline-offset: 6px;
+}
+
+.panel[hidden] {
+  display: none;
+}
+
+.menu-list {
+  display: grid;
+  gap: 1.6rem;
+}
+
+.menu-line {
+  display: flex;
+  align-items: baseline;
+  gap: 0.65rem;
+}
+
+.menu-name {
+  font-family: var(--font-display);
+  font-size: 1.075rem;
+  font-weight: 650;
+  letter-spacing: -0.005em;
+  transition: color 0.3s var(--ease-std);
+}
+
+.leader {
+  flex: 1 1 auto;
+  min-width: 1.5rem;
+  border-bottom: 1px dotted var(--line-strong);
+  transform: translateY(-0.3em);
+  transition: border-color 0.3s var(--ease-std);
+}
+
+.menu-price {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  font-size: 1.1rem;
+  color: var(--ember-text);
+}
+
+.menu-desc {
+  margin-top: 0.25rem;
+  font-size: 0.93rem;
+  color: var(--ink-2);
+  max-width: 26rem;
+}
+
+/* Poster depth: an ember slab peeking out from under the photo. */
+.menu-media {
+  box-shadow: 0.9rem 0.9rem 0 0 var(--ember), var(--shadow-media);
+}
+
+.menu-media img {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+}
+
+/* Rows answer the pointer with a small slide, an ember name, and a
+   solid leader. No background fill: it would drag the price contrast
+   under the line. */
+@media (hover: hover) {
+  .menu-item {
+    transition: transform 0.3s var(--ease-out);
+  }
+
+  .menu-item:hover {
+    transform: translateX(0.4rem);
+  }
+
+  .menu-item:hover .menu-name {
+    color: var(--ember-text);
+  }
+
+  .menu-item:hover .leader {
+    border-bottom-color: var(--ember);
+  }
+}
+
+@media (min-width: 48rem) {
+  .menu-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: clamp(2rem, 4vw, 3.5rem);
+  }
+}
+
+@media (min-width: 64rem) {
+  .menu-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 18.5rem);
+    align-items: start;
+  }
+
+  .menu-media {
+    position: sticky;
+    top: calc(var(--header-h) + 2rem);
+  }
+
+  .menu-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Full-width band
+   -------------------------------------------------------------------------- */
+
+.band {
+  margin-top: clamp(1rem, 3vw, 2rem);
+}
+
+.band img {
+  width: 100%;
+  height: clamp(14rem, 34vw, 26rem);
+  object-fit: cover;
+}
+
+/* --------------------------------------------------------------------------
+   About
+   -------------------------------------------------------------------------- */
+
+.statement {
+  font-size: clamp(2.1rem, 1.3rem + 3.6vw, 4rem);
+  font-weight: 800;
+  font-stretch: 114%;
+  line-height: 1.06;
+  letter-spacing: -0.025em;
+  max-width: 24ch;
+}
+
+.about-cols {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: clamp(1.75rem, 4vw, 2.75rem);
+}
+
+.about-cols p {
+  color: var(--ink-2);
+  font-size: 1.05rem;
+  max-width: 62ch;
+}
+
+/* Editorial drop cap on the story's opening paragraph. */
+.about-cols p:first-of-type::first-letter {
+  float: left;
+  margin-top: 0.06em;
+  margin-right: 0.07em;
+  font-family: var(--font-display);
+  font-size: 3.05em;
+  font-weight: 800;
+  line-height: 0.8;
+  color: var(--ember);
+}
+
+.about-media {
+  display: grid;
+  gap: clamp(1.1rem, 3vw, 2rem);
+  margin-top: clamp(2.5rem, 6vw, 4.5rem);
+}
+
+.about-media-tall img {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+}
+
+.about-media-square {
+  max-width: 26rem;
+}
+
+.about-media-square img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+
+@media (min-width: 48rem) {
+  .about-cols {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: clamp(2rem, 5vw, 4rem);
+  }
+
+  .about-media {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  .about-media-tall {
+    grid-column: 1 / span 6;
+    grid-row: 1;
+  }
+
+  /* The square overlaps the tall frame: collage depth instead of two
+     images sitting politely side by side. Both share row 1 explicitly,
+     since auto-placement would otherwise step the square to row 2. */
+  .about-media-square {
+    grid-column: 6 / span 7;
+    grid-row: 1;
+    max-width: none;
+    position: relative;
+    z-index: 2;
+    margin-top: clamp(3.5rem, 8vw, 6rem);
+    margin-left: clamp(-4.5rem, -4vw, -2.5rem);
+    box-shadow: -18px 24px 48px -24px rgba(16, 26, 21, 0.6);
+  }
+}
+
+@media (min-width: 48rem) and (prefers-color-scheme: dark) {
+  .about-media-square {
+    box-shadow: -18px 24px 48px -24px rgba(0, 0, 0, 0.85);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Hours
+   -------------------------------------------------------------------------- */
+
+.hours-grid {
+  display: grid;
+  gap: clamp(2.25rem, 6vw, 4rem);
+}
+
+/* Inverted block: one deep-green field mid-page so the scroll has rhythm. */
+.hours {
+  background: var(--block);
+  color: var(--block-ink);
+  padding-block: clamp(4rem, 9vw, 7rem);
+}
+
+.status:empty {
+  display: none;
+}
+
+.status {
+  display: inline-block;
+  margin-top: 1.1rem;
+  padding: 0.45rem 1rem;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-size: 0.92rem;
+  font-weight: 650;
+  color: var(--ink-2);
+}
+
+.status[data-state="open"] {
+  border-color: var(--ember);
+  color: var(--ember-text);
+}
+
+/* Everything inside the block re-tints to the block palette. */
+.hours .status {
+  color: var(--block-ink-2);
+  border-color: var(--block-ink-2);
+}
+
+.hours .status[data-state="open"] {
+  border-color: var(--block-ember);
+  color: var(--block-ember);
+}
+
+.hours .hours-table th,
+.hours .hours-table td {
+  border-bottom-color: var(--block-line);
+  color: var(--block-ink-2);
+}
+
+.hours .hours-table tr.is-today th,
+.hours .hours-table tr.is-today td {
+  color: var(--block-ink);
+}
+
+.hours .hours-table tr.is-today th {
+  border-left-color: var(--block-ember);
+}
+
+.hours .hours-note {
+  color: var(--block-ink-2);
+}
+
+.hours-table {
+  width: 100%;
+  margin-top: 1.6rem;
+  border-collapse: collapse;
+  font-size: 1.02rem;
+}
+
+.hours-table th,
+.hours-table td {
+  padding: 0.95rem 0;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  font-weight: 400;
+  color: var(--ink-2);
+}
+
+.hours-table thead th {
+  padding: 0;
+  border: 0;
+}
+
+.hours-table tbody tr:last-child th,
+.hours-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.hours-table tbody th {
+  padding-left: 0.9rem;
+  border-left: 3px solid transparent;
+}
+
+.hours-table td {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.hours-table tr.is-today th,
+.hours-table tr.is-today td {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.hours-table tr.is-today {
+  background: rgba(240, 117, 78, 0.1);
+}
+
+.hours-table tr.is-today th {
+  border-left-color: var(--ember);
+}
+
+.today-tag {
+  display: inline-block;
+  margin-left: 0.55rem;
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  background: var(--ember);
+  color: var(--on-ember);
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  vertical-align: 0.1em;
+}
+
+.hours-note {
+  margin-top: 1.5rem;
+  font-size: 0.93rem;
+  color: var(--ink-2);
+  max-width: 34rem;
+}
+
+.hours-media img {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+}
+
+@media (min-width: 64rem) {
+  .hours-grid {
+    /* image left, text right: alternates direction against the location
+       section that follows, so two splits don't repeat the same shape */
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    align-items: start;
+    gap: clamp(2.5rem, 5vw, 4.5rem);
+  }
+
+  .hours-media {
+    order: -1;
+    margin-top: 3.25rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Location
+   -------------------------------------------------------------------------- */
+
+.location-grid {
+  display: grid;
+  gap: clamp(2.25rem, 6vw, 4rem);
+}
+
+.address {
+  margin-top: 1.4rem;
+  font-style: normal;
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 1rem + 1vw, 1.5rem);
+  font-weight: 650;
+  font-stretch: 110%;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+
+.location-note {
+  margin-top: 1.4rem;
+  color: var(--ink-2);
+  max-width: 34rem;
+}
+
+.location-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin-top: 2rem;
+}
+
+.location-map {
+  position: relative;
+  isolation: isolate;
+}
+
+/* Offset ember frame: the map sits on the page like a printed plate. */
+.location-map::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border: 1.5px solid var(--ember);
+  transform: translate(0.9rem, 0.9rem);
+  pointer-events: none;
+}
+
+.location-map iframe {
+  display: block;
+  width: 100%;
+  height: clamp(17rem, 46vw, 26rem);
+  border: 0;
+  background: var(--bg-2);
+  outline: 1px solid var(--line);
+}
+
+@media (prefers-color-scheme: dark) {
+  .location-map iframe {
+    filter: invert(0.92) hue-rotate(180deg) saturate(0.85) contrast(0.95);
+  }
+}
+
+@media (min-width: 64rem) {
+  .location-grid {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    align-items: start;
+    gap: clamp(2.5rem, 5vw, 4.5rem);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Closing call to action band
+   -------------------------------------------------------------------------- */
+
+.cta {
+  position: relative;
+  isolation: isolate;
+  margin-top: clamp(1.5rem, 4vw, 3rem);
+  padding-block: clamp(4rem, 11vw, 7.5rem);
+  overflow: hidden;
+}
+
+.cta-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cta::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgba(11, 18, 15, 0.87);
+}
+
+.cta-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: clamp(1.75rem, 4vw, 2.5rem);
+}
+
+.cta-inner h2 {
+  color: #f1efe9;
+  font-size: clamp(2.4rem, 1.4rem + 4.2vw, 4.6rem);
+  font-weight: 800;
+  font-stretch: 114%;
+  letter-spacing: -0.025em;
+  max-width: 16ch;
+}
+
+/* --------------------------------------------------------------------------
+   Footer
+   -------------------------------------------------------------------------- */
+
+.site-footer {
+  background: var(--block);
+  color: var(--block-ink);
+  border-top: 1px solid var(--block-line);
+  padding-block: clamp(3rem, 7vw, 5rem) clamp(2.5rem, 6vw, 4rem);
+  font-size: 0.97rem;
+}
+
+.footer-grid {
+  display: grid;
+  gap: 2.25rem;
+}
+
+/* The brand row doubles as the page's closing wordmark. */
+.footer-brand {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem 2rem;
+  padding-bottom: clamp(1.5rem, 4vw, 2.5rem);
+  border-bottom: 1px solid var(--block-line);
+}
+
+.footer-brand .brand {
+  gap: clamp(0.7rem, 2vw, 1.2rem);
+}
+
+.footer-brand .brand-mark {
+  width: clamp(34px, 5vw, 56px);
+  height: auto;
+}
+
+.footer-brand .brand-name {
+  font-size: clamp(2.2rem, 9vw, 7rem);
+  font-weight: 800;
+  font-stretch: 116%;
+  letter-spacing: 0.005em;
+  line-height: 1;
+}
+
+.footer-tag {
+  margin-top: 0;
+  color: var(--block-ink-2);
+}
+
+.footer-nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.5rem;
+}
+
+.footer-nav a,
+.footer-contact a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-block: 0.4rem;
+  color: var(--block-ink-2);
+  text-decoration: none;
+  transition: color 0.3s var(--ease-std);
+}
+
+.footer-nav a:hover,
+.footer-contact a:hover {
+  color: var(--block-ember);
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+}
+
+.footer-contact {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+}
+
+.footer-legal {
+  color: var(--block-ink-2);
+  font-size: 0.88rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--block-line);
+}
+
+@media (min-width: 48rem) {
+  .footer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2.5rem;
+  }
+
+  .footer-legal {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 64rem) {
+  .footer-grid {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 5fr);
+  }
+}
+
+/* Focus rings flip to cream over the dark surfaces. */
+:is(.site-header:not(.is-stuck):not(.is-open), .hero, .hours, .cta, .site-footer)
+  :focus-visible {
+  outline-color: var(--block-ink);
+}
+
+/* --------------------------------------------------------------------------
+   Floating WhatsApp button
+   -------------------------------------------------------------------------- */
+
+.wa-fab {
+  position: fixed;
+  right: clamp(0.85rem, 3vw, 1.5rem);
+  bottom: calc(clamp(0.85rem, 3vw, 1.5rem) + env(safe-area-inset-bottom, 0px));
+  z-index: 45;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 3.15rem;
+  padding: 0.8rem 1.25rem;
+  border-radius: 999px;
+  background: var(--ember);
+  color: var(--on-ember);
+  font-family: var(--font-display);
+  font-size: 0.93rem;
+  font-weight: 650;
+  text-decoration: none;
+  box-shadow: var(--shadow-fab);
+  opacity: 0;
+  transform: translateY(0.9rem);
+  transition: opacity 0.45s var(--ease-soft), transform 0.45s var(--ease-soft),
+    background-color 0.3s var(--ease-std);
+}
+
+.wa-fab.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.wa-fab:hover {
+  background: var(--ember-deep);
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .wa-fab:hover {
+    transform: translateY(-2px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wa-fab {
+    transition: none;
+  }
+}
+
+@media (max-width: 26.25rem) {
+  .wa-fab span:not(.visually-hidden) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .wa-fab {
+    padding: 0.8rem;
+    min-width: 3.15rem;
+    justify-content: center;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Motion
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-anim {
+    opacity: 0;
+    animation: rise 0.9s var(--ease-soft) forwards;
+    animation-delay: var(--d, 0ms);
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(1.25rem);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  html.js .reveal {
+    opacity: 0;
+    transform: translateY(1.25rem);
+    transition: opacity 0.65s var(--ease-soft), transform 0.9s var(--ease-soft);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+
+  html.js .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Photographs settle into frame instead of only fading up. */
+  html.js .reveal img {
+    transform: scale(1.06);
+    transition: transform 1.2s var(--ease-soft);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+
+  html.js .reveal.is-visible img {
+    transform: none;
+  }
+
+  /* Switching menu tabs staggers the list in reading order. */
+  .panel:not([hidden]) .menu-item {
+    animation: rise 0.6s var(--ease-soft) backwards;
+  }
+
+  .panel:not([hidden]) .menu-item:nth-child(1) { animation-delay: 0ms; }
+  .panel:not([hidden]) .menu-item:nth-child(2) { animation-delay: 50ms; }
+  .panel:not([hidden]) .menu-item:nth-child(3) { animation-delay: 100ms; }
+  .panel:not([hidden]) .menu-item:nth-child(4) { animation-delay: 150ms; }
+  .panel:not([hidden]) .menu-item:nth-child(5) { animation-delay: 200ms; }
+  .panel:not([hidden]) .menu-item:nth-child(6) { animation-delay: 250ms; }
+  .panel:not([hidden]) .menu-item:nth-child(7) { animation-delay: 300ms; }
+
+  /* The ticker runs on a loop; hovering pauses it so it can be read. */
+  .marquee-track {
+    animation: marquee 38s linear infinite;
+    will-change: transform;
+  }
+
+  .marquee:hover .marquee-track {
+    animation-play-state: paused;
+  }
+
+  @keyframes marquee {
+    to {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+
+  /* Scroll progress tied directly to scroll position. */
+  @supports (animation-timeline: scroll()) {
+    .progress {
+      animation: progress-fill 1s linear both;
+      animation-timeline: scroll(root block);
+    }
+  }
+
+  @keyframes progress-fill {
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  /* The band and the closing image drift as they cross the screen. */
+  @supports (animation-timeline: view()) {
+    .band img,
+    .cta-bg {
+      animation: img-drift 1s linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+  }
+
+  @keyframes img-drift {
+    from {
+      transform: scale(1.12) translateY(-3.5%);
+    }
+    to {
+      transform: scale(1.12) translateY(3.5%);
+    }
+  }
+
+  /* Live open indicator: a soft breathing dot in the status pill. */
+  .status[data-state="open"]::before {
+    content: "";
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    margin-right: 0.55rem;
+    border-radius: 50%;
+    background: currentColor;
+    animation: pulse 2.6s ease-in-out infinite;
+    vertical-align: 0.02em;
+  }
+
+  @keyframes pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.35;
+    }
+  }
+}
